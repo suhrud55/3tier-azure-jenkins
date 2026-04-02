@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        RESOURCE_GROUP = "existing-rg"
+        RESOURCE_GROUP = "TrainingandPoC"
         WEB_CODE_PATH = "./web"
         APP_CODE_PATH = "./app"
         DB_SCRIPTS_PATH = "./db-scripts"
@@ -13,7 +13,7 @@ pipeline {
                 sh """
                 echo "Logging into Azure..."
                 az login
-                az account set --subscription <your-subscription-id>
+                az account set --subscription b725747e-3462-4e4e-a0e7-1e61e42b39af
                 """
             }
         }
