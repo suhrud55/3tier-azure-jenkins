@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         RESOURCE_GROUP = "TrainingandPoC"
         WEB_CODE_PATH = "./web"
@@ -10,61 +11,61 @@ pipeline {
     stages {
         stage('Azure Login') {
             steps {
-                sh """
+                sh '''
                 echo "Logging into Azure..."
                 az login
                 az account set --subscription b725747e-3462-4e4e-a0e7-1e61e42b39af
-                """
+                '''
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh "terraform init"
+                sh 'terraform init'
             }
         }
 
         stage('Terraform Plan') {
             steps {
-                sh "terraform plan -var-file=terraform.tfvars"
+                sh 'terraform plan -var-file=terraform.tfvars'
             }
         }
 
         stage('Terraform Apply') {
             steps {
-                sh "terraform apply -var-file=terraform.tfvars -auto-approve"
+                sh 'terraform apply -var-file=terraform.tfvars -auto-approve'
             }
         }
 
         stage('Deploy Web Application') {
             steps {
-                sh """
+                sh '''
                 WEB_APP=$(terraform output -raw web_app_name)
                 echo "Deploying Web app to $WEB_APP"
                 az webapp deploy --resource-group $RESOURCE_GROUP \
                     --name $WEB_APP \
                     --src-path $WEB_CODE_PATH \
                     --type zip
-                """
+                '''
             }
         }
 
         stage('Deploy App Application') {
             steps {
-                sh """
+                sh '''
                 APP_SERVICE=$(terraform output -raw app_service_name)
                 echo "Deploying App service to $APP_SERVICE"
                 az webapp deploy --resource-group $RESOURCE_GROUP \
                     --name $APP_SERVICE \
                     --src-path $APP_CODE_PATH \
                     --type zip
-                """
+                '''
             }
         }
 
         stage('Run DB Scripts') {
             steps {
-                sh """
+                sh '''
                 SQL_SERVER=$(terraform output -raw sql_server_name)
                 SQL_DB=$(terraform output -raw sql_db_name)
                 SQL_USER=$(terraform output -raw sql_admin_user)
@@ -75,7 +76,7 @@ pipeline {
                     echo "Running $script..."
                     sqlcmd -S $SQL_SERVER.database.windows.net -d $SQL_DB -U $SQL_USER -P $SQL_PASS -i $script
                 done
-                """
+                '''
             }
         }
     }
